@@ -104,19 +104,19 @@ const calculateAndDisplayBalance = function (movements) {
 };
 
 /////////////////////////////////////////////////
-// CALCULATE AND DISPLAY SUMMARY
-const calculateAndDisplaySummary = function (account, movements) {
-  const sumIn = movements
+// CALCULATE AND DISPLAY SUMMARY -- WIP -- TODO Anticipate accounts with no withdrawals
+const calculateAndDisplaySummary = function (account) {
+  const sumIn = account.movements
     .filter(move => move > 0)
     .reduce((acc, move) => acc + move);
 
-  const sumOut = movements
+  const sumOut = account.movements
     .filter(move => move < 0)
     .reduce((acc, move) => acc + move);
 
-  const interest = movements
+  const interest = account.movements
     .filter(move => move > 0)
-    .map(deposit => (deposit * account1.interestRate) / 100)
+    .map(deposit => (deposit * account.interestRate) / 100)
     .filter(int => int >= 1)
     .reduce((acc, int) => acc + int);
 
@@ -126,7 +126,24 @@ const calculateAndDisplaySummary = function (account, movements) {
 };
 
 /////////////////////////////////////////////////
-// LOGIN
+// WRONG CREDENTIALS
+const wrongCredentials = function () {
+  containerApp.style.opacity = '0%';
+  labelWelcome.textContent = 'Wrong credentials';
+  inputLoginUsername.value = inputLoginPin.value = '';
+  inputLoginPin.blur();
+};
+
+/////////////////////////////////////////////////
+// CALCULATE AND DISPLAY MOVEMENTS, BALANCE AND SUMMARY
+const calculateAndDisplayMovementsBalanceSummary = function (account) {
+  displayMovements(account.movements);
+  calculateAndDisplayBalance(account.movements);
+  calculateAndDisplaySummary(account);
+};
+
+/////////////////////////////////////////////////
+// LOGIN -- WIP -- TODO Implement timer
 let currentAccount;
 
 btnLogin.addEventListener('click', function (e) {
@@ -136,18 +153,82 @@ btnLogin.addEventListener('click', function (e) {
     acc => acc.username === inputLoginUsername.value
   );
 
+  if (!currentAccount) {
+    wrongCredentials();
+  }
+
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
     labelWelcome.textContent = `Welcome back ${
       currentAccount.owner.split(' ')[0]
     }`;
 
     // Handle opacity, uncomment l 97 in CSS file and here when application coding is done
-    // containerApp.style.opacity = '100%';
+    containerApp.style.opacity = '100%';
 
-    displayMovements(currentAccount.movements);
-    calculateAndDisplayBalance(currentAccount.movements);
-    calculateAndDisplaySummary(currentAccount, currentAccount.movements);
+    calculateAndDisplayMovementsBalanceSummary(currentAccount);
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
   } else {
-    console.log('no user with this username or wrong pin');
+    wrongCredentials();
   }
 });
+
+/////////////////////////////////////////////////
+// LOAN -- WIP -- TODO implement condition "Any deposit > 10% of request ?"
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  currentAccount.movements.push(Number(inputLoanAmount.value));
+  calculateAndDisplayMovementsBalanceSummary(currentAccount);
+
+  inputLoanAmount.value = '';
+  inputLoanAmount.blur();
+});
+
+/////////////////////////////////////////////////
+// TRANSFER
+let recipientAccount;
+
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  recipientAccount = accounts.find(
+    acc => acc.username === inputTransferTo.value
+  );
+
+  if (recipientAccount) {
+    recipientAccount.movements.push(Number(inputTransferAmount.value));
+    currentAccount.movements.push(Number(`-${inputTransferAmount.value}`));
+
+    calculateAndDisplayMovementsBalanceSummary(currentAccount);
+
+    inputTransferTo.value = inputTransferAmount.value = '';
+    inputTransferAmount.blur();
+  } else {
+    alert("Slected recipient doesn't exist");
+    inputTransferTo.focus();
+  }
+});
+
+/////////////////////////////////////////////////
+// SORT
+
+/////////////////////////////////////////////////
+// CLOSE
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  if (
+    currentAccount.username === inputCloseUsername.value &&
+    currentAccount.pin === Number(inputClosePin.value)
+  ) {
+    accounts.splice(accounts.indexOf(currentAccount), 1);
+    inputCloseUsername.value = inputClosePin.value = '';
+    containerApp.style.opacity = '0%';
+    alert('Account deleted');
+    labelWelcome.textContent = 'Log in to get started';
+  }
+});
+
+/////////////////////////////////////////////////
+// TIMEOUT
