@@ -60,3 +60,94 @@ const inputTransferAmount = document.querySelector('.form__input--amount');
 const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
+
+/////////////////////////////////////////////////
+// CREATE USERNAMES
+const createsUsername = function (accounts) {
+  accounts.forEach(function (account) {
+    account.username ||= account.owner
+      .toLowerCase()
+      .split(' ')
+      .map(name => name[0])
+      .join('');
+  });
+};
+createsUsername(accounts);
+
+/////////////////////////////////////////////////
+// DISPLAY MOVEMENTS
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = '';
+
+  movements.forEach(function (mov, i) {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+
+    const html = `
+      <div class="movements__row">
+        <div class="movements__type movements__type--${type}">
+        ${i + 1} ${type}</div>
+        <div class="movements__date">TODO : date</div>
+        <div class="movements__value">${mov}€</div>
+      </div>
+    `;
+
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
+/////////////////////////////////////////////////
+// CALCULATE AND DISPLAY BALANCE
+const calculateAndDisplayBalance = function (movements) {
+  const balance = movements.reduce((acc, mov) => acc + mov);
+
+  labelBalance.textContent = `${balance} €`;
+};
+
+/////////////////////////////////////////////////
+// CALCULATE AND DISPLAY SUMMARY
+const calculateAndDisplaySummary = function (account, movements) {
+  const sumIn = movements
+    .filter(move => move > 0)
+    .reduce((acc, move) => acc + move);
+
+  const sumOut = movements
+    .filter(move => move < 0)
+    .reduce((acc, move) => acc + move);
+
+  const interest = movements
+    .filter(move => move > 0)
+    .map(deposit => (deposit * account1.interestRate) / 100)
+    .filter(int => int >= 1)
+    .reduce((acc, int) => acc + int);
+
+  labelSumIn.textContent = `${sumIn}€`;
+  labelSumOut.textContent = `${Math.abs(sumOut)}€`;
+  labelSumInterest.textContent = `${interest}€`;
+};
+
+/////////////////////////////////////////////////
+// LOGIN
+let currentAccount;
+
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value
+  );
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    labelWelcome.textContent = `Welcome back ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+
+    // Handle opacity, uncomment l 97 in CSS file and here when application coding is done
+    // containerApp.style.opacity = '100%';
+
+    displayMovements(currentAccount.movements);
+    calculateAndDisplayBalance(currentAccount.movements);
+    calculateAndDisplaySummary(currentAccount, currentAccount.movements);
+  } else {
+    console.log('no user with this username or wrong pin');
+  }
+});
