@@ -239,9 +239,13 @@ btnClose.addEventListener('click', function (e) {
   e.preventDefault();
 
   if (
-    currentAccount.username === inputCloseUsername.value &&
-    currentAccount.pin === Number(inputClosePin.value)
+    currentAccount.username !== inputCloseUsername.value ||
+    currentAccount.pin !== Number(inputClosePin.value)
   ) {
+    alert('Wrong credentials');
+    inputCloseUsername.value = inputClosePin.value = '';
+    inputCloseUsername.focus();
+  } else {
     accounts.splice(accounts.indexOf(currentAccount), 1);
     inputCloseUsername.value = inputClosePin.value = '';
     containerApp.style.opacity = '0%';
