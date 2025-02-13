@@ -86,7 +86,7 @@ const displayMovements = function (movements) {
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">
         ${i + 1} ${type}</div>
-        <div class="movements__date">TODO : date</div>
+        <div class="movements__date">${new Date().toLocaleDateString()}</div>
         <div class="movements__value">${mov}€</div>
       </div>
     `;
@@ -103,15 +103,20 @@ const calculateAndDisplayBalance = function (account) {
 };
 
 /////////////////////////////////////////////////
-// CALCULATE AND DISPLAY SUMMARY -- WIP -- TODO Anticipate accounts with no withdrawals
+// CALCULATE AND DISPLAY SUMMARY
 const calculateAndDisplaySummary = function (account) {
   const sumIn = account.movements
     .filter(move => move > 0)
     .reduce((acc, move) => acc + move);
 
-  const sumOut = account.movements
-    .filter(move => move < 0)
-    .reduce((acc, move) => acc + move);
+  let sumOut;
+  if (account.movements.filter(move => move < 0).length <= 0) {
+    sumOut = 0;
+  } else {
+    sumOut = account.movements
+      .filter(move => move < 0)
+      .reduce((acc, move) => acc + move);
+  }
 
   const interest = account.movements
     .filter(move => move > 0)
@@ -192,7 +197,7 @@ btnLoan.addEventListener('click', function (e) {
       } on your account therefore we cannot grant you this loan`
     );
   } else {
-    currentAccount.movements.push(Number(inputLoanAmount.value));
+    currentAccount.movements.push(requestedAmount);
     calculateAndDisplayMovementsBalanceSummary(currentAccount);
   }
   inputLoanAmount.value = '';
@@ -245,7 +250,7 @@ btnTransfer.addEventListener('click', function (e) {
 });
 
 /////////////////////////////////////////////////
-// SORT
+// SORT TODO implement sort
 
 /////////////////////////////////////////////////
 // CLOSE
@@ -269,4 +274,4 @@ btnClose.addEventListener('click', function (e) {
 });
 
 /////////////////////////////////////////////////
-// TIMEOUT
+// TIMEOUT TODO implement timeout
