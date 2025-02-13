@@ -105,9 +105,14 @@ const calculateAndDisplayBalance = function (account) {
 /////////////////////////////////////////////////
 // CALCULATE AND DISPLAY SUMMARY
 const calculateAndDisplaySummary = function (account) {
-  const sumIn = account.movements
-    .filter(move => move > 0)
-    .reduce((acc, move) => acc + move);
+  let sumIn;
+  if (account.movements.filter(move => move > 0).length <= 0) {
+    sumIn = 0;
+  } else {
+    sumIn = account.movements
+      .filter(move => move > 0)
+      .reduce((acc, move) => acc + move);
+  }
 
   let sumOut;
   if (account.movements.filter(move => move < 0).length <= 0) {
@@ -118,15 +123,20 @@ const calculateAndDisplaySummary = function (account) {
       .reduce((acc, move) => acc + move);
   }
 
-  const interest = account.movements
-    .filter(move => move > 0)
-    .map(deposit => (deposit * account.interestRate) / 100)
-    .filter(int => int >= 1)
-    .reduce((acc, int) => acc + int);
+  let interests;
+  if (sumIn > 0) {
+    interests = account.movements
+      .filter(move => move > 0)
+      .map(deposit => (deposit * account.interestRate) / 100)
+      .filter(interest => interest >= 1)
+      .reduce((acc, int) => acc + int);
+  } else {
+    interests = 0;
+  }
 
   labelSumIn.textContent = `${sumIn}€`;
   labelSumOut.textContent = `${Math.abs(sumOut)}€`;
-  labelSumInterest.textContent = `${interest}€`;
+  labelSumInterest.textContent = `${interests}€`;
 };
 
 /////////////////////////////////////////////////
