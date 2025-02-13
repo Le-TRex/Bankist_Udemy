@@ -97,10 +97,9 @@ const displayMovements = function (movements) {
 
 /////////////////////////////////////////////////
 // CALCULATE AND DISPLAY BALANCE
-const calculateAndDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov);
-
-  labelBalance.textContent = `${balance} €`;
+const calculateAndDisplayBalance = function (account) {
+  account.balance = account.movements.reduce((acc, mov) => acc + mov);
+  labelBalance.textContent = `${account.balance} €`;
 };
 
 /////////////////////////////////////////////////
@@ -126,7 +125,7 @@ const calculateAndDisplaySummary = function (account) {
 };
 
 /////////////////////////////////////////////////
-// WRONG CREDENTIALS
+// WRONG CREDENTIALS -- Remember to uncomment .app opacity, style.css l 97
 const wrongCredentials = function () {
   containerApp.style.opacity = '0%';
   labelWelcome.textContent = 'Wrong credentials';
@@ -138,7 +137,7 @@ const wrongCredentials = function () {
 // CALCULATE AND DISPLAY MOVEMENTS, BALANCE AND SUMMARY
 const calculateAndDisplayMovementsBalanceSummary = function (account) {
   displayMovements(account.movements);
-  calculateAndDisplayBalance(account.movements);
+  calculateAndDisplayBalance(account);
   calculateAndDisplaySummary(account);
 };
 
@@ -197,6 +196,30 @@ btnTransfer.addEventListener('click', function (e) {
   );
 
   if (recipientAccount) {
+    console.log(recipientAccount.username);
+  } else {
+    console.log('No recipient account found');
+  }
+
+  if (!recipientAccount) {
+    // No recipient account found
+    alert("Selected recipient doesn't exist");
+    inputTransferTo.focus();
+  } else if (inputTransferAmount.value <= 0) {
+    // Value to transfer is <= 0
+    alert('You cannot tranfer 0€ or less');
+    inputTransferAmount.focus();
+  } else if (currentAccount.balance < inputTransferAmount.value) {
+    // amount to tranfer is > sender's account balance
+    alert(
+      'Your account balance must be superior to the amount of money you want to transfer'
+    );
+    inputTransferAmount.focus();
+  } else if (currentAccount === recipientAccount) {
+    // sender is tranfering money to himself/herself
+    alert('You cannot tranfer money to yourself');
+    inputTransferTo.focus();
+  } else {
     recipientAccount.movements.push(Number(inputTransferAmount.value));
     currentAccount.movements.push(Number(`-${inputTransferAmount.value}`));
 
@@ -204,9 +227,6 @@ btnTransfer.addEventListener('click', function (e) {
 
     inputTransferTo.value = inputTransferAmount.value = '';
     inputTransferAmount.blur();
-  } else {
-    alert("Slected recipient doesn't exist");
-    inputTransferTo.focus();
   }
 });
 
