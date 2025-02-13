@@ -173,15 +173,29 @@ btnLogin.addEventListener('click', function (e) {
 });
 
 /////////////////////////////////////////////////
-// LOAN -- WIP -- TODO implement condition "Any deposit > 10% of request ?"
+// LOAN
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
 
-  currentAccount.movements.push(Number(inputLoanAmount.value));
-  calculateAndDisplayMovementsBalanceSummary(currentAccount);
+  const requestedAmount = Number(inputLoanAmount.value);
+  const percentageOfAmount = 0.1;
+  const isAnySufficientDeposit = currentAccount.movements.some(
+    mouvement => mouvement > requestedAmount * percentageOfAmount
+  );
 
+  if (requestedAmount <= 0) {
+    alert('You cannot ask for a loan equal or less than 0€');
+  } else if (!isAnySufficientDeposit) {
+    alert(
+      `You did not make any deposit superior to ${
+        requestedAmount * percentageOfAmount
+      } on your account therefore we cannot grant you this loan`
+    );
+  } else {
+    currentAccount.movements.push(Number(inputLoanAmount.value));
+    calculateAndDisplayMovementsBalanceSummary(currentAccount);
+  }
   inputLoanAmount.value = '';
-  inputLoanAmount.blur();
 });
 
 /////////////////////////////////////////////////
